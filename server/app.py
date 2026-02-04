@@ -25,7 +25,10 @@ app.add_middleware(
 def _iso_time(timestamp: float | None) -> str | None:
     if timestamp is None:
         return None
-    return dt.datetime.fromtimestamp(timestamp, dt.timezone.utc).isoformat()
+    try:
+        return dt.datetime.fromtimestamp(float(timestamp), dt.timezone.utc).isoformat()
+    except (TypeError, ValueError):
+        return None
 
 
 def _packet_src_dst(pkt) -> tuple[str | None, str | None]:
