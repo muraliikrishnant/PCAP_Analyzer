@@ -193,6 +193,7 @@ function App() {
   const [llmReport, setLlmReport] = useState('')
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState('')
+  const [llmError, setLlmError] = useState('')
 
   const protocols = useMemo(() => extractProtocols(analysis?.summary), [analysis])
   const topTalkers = useMemo(
@@ -269,6 +270,7 @@ function App() {
     }
     setStatus('parsing')
     setError('')
+    setLlmError('')
     setAnalysis(null)
     setLlmReport('')
 
@@ -278,13 +280,18 @@ function App() {
       setStatus('reasoning')
 
       const prompt = buildPrompt(parsed)
-      const report = await queryLlm({
-        provider: llmProvider,
-        endpoint: llmEndpoint,
-        model: llmModel,
-        prompt,
-      })
-      setLlmReport(report)
+      try {
+        const report = await queryLlm({
+          provider: llmProvider,
+          endpoint: llmEndpoint,
+          model: llmModel,
+          prompt,
+        })
+        setLlmReport(report)
+      } catch (llmErr) {
+        setLlmReport('')
+        setLlmError(llmErr?.message || 'LLM request failed.')
+      }
       setStatus('done')
     } catch (err) {
       setStatus('idle')
@@ -464,6 +471,7 @@ function App() {
 
       <section className="panel wide">
         <div className="panel-header">AI Narrative Report</div>
+        {llmError && <div className="error">{llmError}</div>}
         {llmReport ? (
           <div className="report">
             {llmReport.split('\n').map((line, index) => (
