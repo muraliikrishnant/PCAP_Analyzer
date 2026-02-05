@@ -52,6 +52,18 @@ function formatBytes(bytes) {
   return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`
 }
 
+function formatTimestamp(value) {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value)
+  return date.toLocaleString()
+}
+
+function formatRange(start, end) {
+  if (!start && !end) return '—'
+  return `${formatTimestamp(start)} → ${formatTimestamp(end)}`
+}
+
 function extractProtocols(summary) {
   if (!summary) return []
   if (Array.isArray(summary.protocols)) return summary.protocols
@@ -394,7 +406,7 @@ function App() {
               <div>
                 <p>Capture window</p>
                 <h3>
-                  {analysis.summary.capture_start || '—'} → {analysis.summary.capture_end || '—'}
+                  {formatRange(analysis.summary.capture_start, analysis.summary.capture_end)}
                 </h3>
               </div>
               <div>
